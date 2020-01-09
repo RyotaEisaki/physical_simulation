@@ -9,13 +9,13 @@ int main(void){
     double x[size];
     double y[size];
 
-    fp = fopen("misshit.csv", "w"); if (fp == NULL) {
+    fp = fopen("misshit1.csv", "w"); if (fp == NULL) {
         fprintf(stderr, "Error!¥n");
         exit(1);
     }
 
-    int firstseed=193;
-
+    int seed=193;
+    srand(seed);
     fprintf(fp,"%s,%s\n","x","y");
     for (int i = 0; i < size; i++)
     {
