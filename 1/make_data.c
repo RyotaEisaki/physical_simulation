@@ -15,12 +15,6 @@ int main(void){
 
     int seed=193;
     srand(seed);
-    // printf("%d\n",rand());
-    // printf("%d\n",rand());
-    // srand(rand());
-    // printf("%d\n",rand());
-    // srand(rand());
-    // printf("%d\n",rand());
 
     fprintf(fp,"%s,%s\n","x","y");
 
