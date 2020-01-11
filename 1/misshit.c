@@ -45,11 +45,14 @@ int main(void){
                 count++;
             }
         }
-    printf("%d\n",loop_count+1);
-    printf("%s%d\n","Hit: ", count);
+    // printf("%d\n",loop_count+1);
+    // printf("%s%d\n","Hit: ", count);
+
     double area=(double)count/(double)size*4;
-    printf("%s%lf\n","Area: ", area);
-    printf("\n");
+
+    // printf("%s%lf\n","Area: ", area);
+    // printf("\n");
+
     area_sum+=area;
     }
     printf("%s\n","__________");
