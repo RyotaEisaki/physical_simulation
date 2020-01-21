@@ -5,7 +5,7 @@
 int main(void){
     FILE *fp ;
     
-    int size = 10000;
+    int size = 1000;
     
     int count=0;
     double x[size];
