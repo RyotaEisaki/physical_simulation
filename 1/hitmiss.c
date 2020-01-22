@@ -16,7 +16,17 @@ int main(void){
         exit(1);
     }
 
-    int seed=193;
+    int seed=149;
+    // int seed=193;
+    // int seed=251;
+    // int seed=383;
+    // int seed=457;
+    // int seed=503;
+    // int seed=691;
+    // int seed=761;
+    // int seed=829;
+    // int seed=991;
+
     srand(seed);
     // fprintf(fp,"%s,%s\n","x","y");
 
