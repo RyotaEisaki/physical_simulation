@@ -35,6 +35,9 @@ int main(void){
         printf("%lf,%lf\n",x[i],y[i]);
         fprintf(fp,"%lf,%lf\n",x[i],y[i]);
     }
+    double t = 1+(double)(2*rand()/(RAND_MAX + 1.0 ));
+    
+    printf("%lf\n",t);
     fclose(fp);
     return 0;
 }
