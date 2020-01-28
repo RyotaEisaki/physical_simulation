@@ -38,115 +38,14 @@ int main(void) {
         printf("%d",state[k]);
     }
     printf("\n");
-    double value= (double)test/length;
-    printf("%f\n",value);
+    // double value= (double)test/length;
+    // printf("%f\n",value);
     
 
-    // ca184
+    // CA184
     for (int i=0; i<time; i++){
         for(int l=0; l<length;l++){
-            if (l==0){
-                //1 111 1
-                if (state[length-1]==1 && state[l]==1 && state[l+1]==1){
-                    state[l]=1;
-                }
-                //2 110 0
-                else if (state[length-1]==1 && state[l]==1 && state[l+1]==0){
-                    state[l]=0;
-                }
-                //3 101 1
-                else if (state[length-1]==1 && state[l]==0 && state[l+1]==1){
-                    state[l]=1;
-                }
-                //4 100 1
-                else if (state[length-1]==1 && state[l]==0 && state[l+1]==0){
-                    state[l]=1;
-                }
-                //5 011 1
-                else if (state[length-1]==0 && state[l]==1 && state[l+1]==1){
-                    state[l]=1;
-                }
-                //6 010 0
-                else if (state[length-1]==0 && state[l]==1 && state[l+1]==0){
-                    state[l]=0;
-                }
-                //7 001 0
-                else if (state[length-1]==0 && state[l]==0 && state[l+1]==1){
-                    state[l]=0;
-                }
-                //8 000 0
-                else if (state[length-1]==0 && state[l]==0 && state[l+1]==0){
-                    state[l]=0;
-                }
-            }
-            else if(l>=2&&l<length){
-                //1 111 1
-                if (state[l-1]==1 && state[l]==1 && state[l+1]==1){
-                    state[l]=1;
-                }
-                    //2 110 0
-                else if (state[l-1]==1 && state[l]==1 && state[l+1]==0){
-                    state[l]=0;
-                }
-                //3 101 1
-                else if (state[l-1]==1 && state[l]==0 && state[l+1]==1){
-                    state[l]=1;
-                }
-                //4 100 1
-                else if (state[l-1]==1 && state[l]==0 && state[l+1]==0){
-                    state[l]=1;
-                }
-                //5 011 1
-                else if (state[l-1]==0 && state[l]==1 && state[l+1]==1){
-                    state[l]=1;
-                }
-                //6 010 0
-                else if (state[l-1]==0 && state[l]==1 && state[l+1]==0){
-                    state[l]=0;
-                }
-                //7 001 0
-                else if (state[l-1]==0 && state[l]==0 && state[l+1]==1){
-                    state[l]=0;
-                }
-                //8 000 0
-                else if (state[l-1]==0 && state[l]==0 && state[l+1]==0){
-                    state[l]=0;
-                }
-            }
-            else if(l==length){
-                //1 111 1
-                if (state[l-1]==1 && state[l]==1 && state[0]==1){
-                    state[l]=1;
-                }
-                    //2 110 0
-                else if (state[l-1]==1 && state[l]==1 && state[0]==0){
-                    state[l]=0;
-                }
-                //3 101 1
-                else if (state[l-1]==1 && state[l]==0 && state[0]==1){
-                    state[l]=1;
-                }
-                //4 100 1
-                else if (state[l-1]==1 && state[l]==0 && state[0]==0){
-                    state[l]=1;
-                }
-                //5 011 1
-                else if (state[l-1]==0 && state[l]==1 && state[0]==1){
-                    state[l]=1;
-                }
-                //6 010 0
-                else if (state[l-1]==0 && state[l]==1 && state[0]==0){
-                    state[l]=0;
-                }
-                //7 001 0
-                else if (state[l-1]==0 && state[l]==0 && state[0]==1){
-                    state[l]=0;
-                }
-                //8 000 0
-                else if (state[l-1]==0 && state[l]==0 && state[0]==0){
-                    state[l]=0;
-                }
-            }
+        if ()
         }
         for (int k=0; k<length; k++){
             printf("%d",state[k]);
