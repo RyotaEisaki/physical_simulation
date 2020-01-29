@@ -15,14 +15,21 @@ int main(void) {
     double random;
 
     //first state
-    printf("%s\n","Please input the number(0~1) to decide the initial density;");
+    printf("%s\n","Please input the number (0~1) to decide the initial density;");
     scanf("%lf", &density);
 
     int seed[10] = {149,193,251,383,457,503,691,761,829,991};
-    printf("%s\n","Please input the numbeer(1~10) to select seed;");
+    printf("%s\n","Please input the numbeer (1~10) to select seed;");
     printf("%s\n","1: 149, 2: 193, 3: 251, 4: 383, 5: 457, 6: 503, 7: 691, 8: 761, 9: 829, 10: 991");
     scanf("%d", &number);
     srand(seed[number-1]);
+
+    printf("\n");
+    printf("%s\n","CONDITION;");
+    printf("%s%lf\n","- Density; ",density);
+    printf("%s%d\n","- Seed; ",seed[number-1]);
+    printf("\n");
+    printf("%s\n","SIMULATION RESULT;");
 
     for (int i=0;i<length;i++){
             random=(double)(1*rand()/(RAND_MAX + 1.0 ));
