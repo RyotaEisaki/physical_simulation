@@ -45,7 +45,7 @@ int main(void) {
     // CA184
     for (int i=0; i<time; i++){
         for(int l=0; l<length;l++){
-        if ()
+        state[length-1]=(i==0)
         }
         for (int k=0; k<length; k++){
             printf("%d",state[k]);
