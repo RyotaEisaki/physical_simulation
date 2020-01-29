@@ -5,10 +5,10 @@
 
 int main(void) {
 
-    int length=20;
-    int time=20;
-    // int length;
-    // int time;
+    // int length=20;
+    // int time=20;
+    int length;
+    int time;
     
     int state[length];
     int tmp[length];
@@ -16,14 +16,14 @@ int main(void) {
     int number;
     double random;
 
-    // //length
-    // printf("%s\n","Please input the number to decide the length;");
-    // scanf("%d", &length);
-    // printf("%d\n",length);
-    // //time
-    // printf("%s\n","Please input the number to decide the time;");
-    // scanf("%d", &time);
-    // printf("%d\n",time);
+    //length
+    printf("%s\n","Please input the number to decide the length;");
+    scanf("%d", &length);
+    printf("%d\n",length);
+    //time
+    printf("%s\n","Please input the number to decide the time;");
+    scanf("%d", &time);
+    printf("%d\n",time);
 
    
     //density
@@ -72,7 +72,7 @@ int main(void) {
     
 
     int t = 1;
-    while (t <= length) {
+    while (t <= time) {
         for (int j = 0; j < length; j++) {
             if ((j-1 < 0 ? state[length-1] : state[j-1]) == 1 && state[j] == 0) {
                 tmp[j] = 1;
