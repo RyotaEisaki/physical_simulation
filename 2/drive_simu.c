@@ -1,27 +1,56 @@
 #include <stdio.h>
 #include<stdlib.h>
 #include <math.h>
+#include <string.h>
 
 int main(void) {
-    int length =20;
-   
-    int state[length];
-    double density;
-    
-    int time =20;
-   
-   double t;
 
-    //first state
+    int length=20;
+    int time=20;
+    // int length;
+    // int time;
+    
+    int state[length];
+    int tmp[length];
+    double density;
+    int number;
+    double random;
+
+    // //length
+    // printf("%s\n","Please input the number to decide the length;");
+    // scanf("%d", &length);
+    // printf("%d\n",length);
+    // //time
+    // printf("%s\n","Please input the number to decide the time;");
+    // scanf("%d", &time);
+    // printf("%d\n",time);
+
+   
+    //density
+    printf("%s\n","Please input the number (0~1) to decide the initial density;");
     scanf("%lf", &density);
 
+    //seed
     int seed[10] = {149,193,251,383,457,503,691,761,829,991};
-    srand(seed[5]);
+    printf("%s\n","Please input the numbeer (1~10) to select seed;");
+    printf("%s\n","1: 149, 2: 193, 3: 251, 4: 383, 5: 457, 6: 503, 7: 691, 8: 761, 9: 829, 10: 991");
+    scanf("%d", &number);
+    srand(seed[number-1]);
+
+    //diaplay the condition
+    printf("\n");
+    printf("%s\n","CONDITION;");
+    printf("%s%d\n","- Length; ",length);
+    printf("%s%d\n","- Time; ",time);
+    printf("%s%lf\n","- Density; ",density);
+    printf("%s%d\n","- Seed; ",seed[number-1]);
+    printf("\n");
+    printf("%s\n","SIMULATION RESULT;");
 
     for (int i=0;i<length;i++){
-            t=(double)(1*rand()/(RAND_MAX + 1.0 ));
-            printf("%lf\n",t);
-            if (t<density){
+            random=(double)(1*rand()/(RAND_MAX + 1.0 ));
+            // printf("%lf\n",random);
+            if (random<density){
                 state[i]=1;
             }
             else{
@@ -29,31 +58,43 @@ int main(void) {
             }
     }
 
-    printf("%s\n","Base State; ");
-    int test;
+    printf("%s","t = 0 :  ");
+    // int test;
     for (int k=0; k<length; k++){
         if(state[k]==1){
-            test++;
+            // test++;
         }
-        printf("%d",state[k]);
+        printf("%d ",state[k]);
     }
     printf("\n");
     // double value= (double)test/length;
     // printf("%f\n",value);
     
 
-    // CA184
-    for (int i=0; i<time; i++){
-        for(int l=0; l<length;l++){
-        state[length-1]=(i==0)
+    int t = 1;
+    while (t <= length) {
+        for (int j = 0; j < length; j++) {
+            if ((j-1 < 0 ? state[length-1] : state[j-1]) == 1 && state[j] == 0) {
+                tmp[j] = 1;
+                continue;
+            }
+            if (state[j] == 1 && (j+1 < length ? state[j+1] : state[0]) == 1) {
+                tmp[j] = 1;
+                continue;
+            }
+            tmp[j] = 0;
         }
-        for (int k=0; k<length; k++){
-            printf("%d",state[k]);
+        memcpy(state, tmp, sizeof(tmp));
+
+        if (t < 10) {
+            printf("t = %d :  ", t);
+        } else {
+            printf("t = %d:  ", t);
+        }
+        for (int j = 0; j < length; j++) {
+            printf("%d ", state[j]);
         }
         printf("\n");
+        t++;
     }
-
-    return 0;
 }
-    
-

@@ -4,28 +4,44 @@
 #include <string.h>
 
 int main(void) {
-    int length =20;
+
+    int length=20;
+    int time=20;
+    // int length;
+    // int time;
+    
     int state[length];
     int tmp[length];
     double density;
     int number;
-    
-    int time =20;
-   
     double random;
 
-    //first state
+    // //length
+    // printf("%s\n","Please input the number to decide the length;");
+    // scanf("%d", &length);
+    // printf("%d\n",length);
+    // //time
+    // printf("%s\n","Please input the number to decide the time;");
+    // scanf("%d", &time);
+    // printf("%d\n",time);
+
+   
+    //density
     printf("%s\n","Please input the number (0~1) to decide the initial density;");
     scanf("%lf", &density);
 
+    //seed
     int seed[10] = {149,193,251,383,457,503,691,761,829,991};
     printf("%s\n","Please input the numbeer (1~10) to select seed;");
     printf("%s\n","1: 149, 2: 193, 3: 251, 4: 383, 5: 457, 6: 503, 7: 691, 8: 761, 9: 829, 10: 991");
     scanf("%d", &number);
     srand(seed[number-1]);
 
+    //diaplay the condition
     printf("\n");
     printf("%s\n","CONDITION;");
+    printf("%s%d\n","- Length; ",length);
+    printf("%s%d\n","- Time; ",time);
     printf("%s%lf\n","- Density; ",density);
     printf("%s%d\n","- Seed; ",seed[number-1]);
     printf("\n");
