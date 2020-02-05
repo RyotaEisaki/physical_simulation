@@ -2,8 +2,10 @@
 #include<stdlib.h>
 #include <math.h>
 
+
 int main(void){
     FILE *fp ;
+
     int size = 500;
 
     double x0[size];
@@ -22,7 +24,7 @@ int main(void){
     scanf("%d", &number);
     srand(seed[number-1]);
 
-    fprintf(fp,"%s,%s,%s,%s\n","x","y","x_","y_");
+    fprintf(fp,"%s,%s,%s,%s\n","x_","y_","x","y");
 
     for (int i = 0; i < size; i++)
     {
@@ -48,12 +50,15 @@ int main(void){
 
     double vx[size];
     double vy[size];
+
     //膨張前
-    double x[size];
-    double y[size];
-    //膨張後
     double x_[size];
     double y_[size];
+
+    //膨張後
+    double x[size];
+    double y[size];
+
 
     //初速度を設定
     for (int i=0;i<size;i++){
@@ -61,35 +66,55 @@ int main(void){
         vy[i]=H*y0[i];
     }
 
+    //  for (int i = 0; i < size; i++)
+    // {
+    //     printf("%lf%lf\n",vx[i],vy[i]);
+    // }
+    // printf("\n");
+
+
     //全天体の位置を移動
     for (int i=0;i<size;i++){
         x[i]=x0[i]+org;
         y[i]=y0[i]+org;
     }
 
+    // for (int i = 0; i < size; i++)
+    // {
+    //     printf("%lf%lf\n",x[i],y[i]);
+    // }
+    // printf("\n");
+
     for (int i=0;i<size;i++){
         x_[i]=x[i];
         y_[i]=y[i];
     }
 
+    for (int i = 0; i < size; i++)
+    {
+        printf("%lf%lf\n",x_[i],y_[i]);
+    }
+
     //新しい位置を計算
     for (int l; l<nk;l++){
-        for (int i;i<size;i++){
-            double t1 =x_[i]+vx[i]*dt;
-            double t2=y_[i]+vy[i]*dt;
-            x_[i]=t1;
-            y_[i]=t2;
+        for (int i=0;i<size;i++){
+            x[i]=x[i]+vx[i]*dt;
+            y[i]=y[i]+vy[i]*dt;
         }
     }
-
-     for (int i = 0; i < size; i++)
+    
+    for (int i = 0; i < size; i++)
     {
-        printf("%lf,%lf,%lf,%lf\n",x[i],y[i],x_[i],y_[i]);
+        printf("%lf%lf\n",x[i],y[i]);
     }
 
+    for (int i = 0; i < size; i++)
+    {
+        printf("%lf,%lf,%lf,%lf\n",x_[i],y_[i],x[i],y[i]);
+    }
 
     for (int i=0;i<size;i++){
-        fprintf(fp,"%lf,%lf,%lf,%lf\n",x[i],y[i],x_[i],y_[i]);
+        fprintf(fp,"%lf,%lf,%lf,%lf\n",x_[i],y_[i],x[i],y[i]);
     }
     fclose(fp);
     return 0;

@@ -2,30 +2,40 @@
 #include<stdlib.h>
 #include <math.h>
 
-int ro(int x, int y){
+int ro_calc(int x, int y){
     return 6*x-3*y;
 }
 
 int main(void){
-    int ix,iy;
+    int ix,iy;   
     int nm=2; /* nm：1軸当たりの格子点数*/
-    int ni=5; /* ni：反復回数*/
+    
+    int ni=100; /* ni：反復回数*/
+    
     int G=1;
     int dx=1;
-    int ro[nm][nm]; //密度
-    double phi[nm][nm];//求める解φ
+    int ro[4][4]; //密度
+    double phi[4][4];//求める解φ
     int p1,p2;
 
+
     //初期化
-    for(ix=0; ix<=nm+1; ix++){ 
+    for(ix=0; ix<=4; ix++){ 
         for(iy=0; iy<=nm+1; iy++) {
             phi[ix][iy] = 0.0;
         }
     }
+
     phi[1][3]=22.5;
     phi[2][3]=36;
     phi[3][1]=-4.5;
     phi[3][2]=9;
+
+    for(ix=0; ix<=4; ix++){ 
+        for(iy=0; iy<=nm+1; iy++) {
+            ro[ix][iy] = ro_calc(ix, iy);
+        }
+    }
 
     //gauss_seidel
     for(int i=1; i<=ni; i++){ 
@@ -35,4 +45,13 @@ int main(void){
             phi[ix][iy] = p1/4 - p2/4;
         }
     }
+
+    for (int iy = 3; iy > -1; iy--) {
+        for (int ix = 0; ix < 4; ix++) {
+            printf("%f ",phi[ix][iy]);
+    }
+    printf("\n");
+    }
+
+    return 0;   
 }
