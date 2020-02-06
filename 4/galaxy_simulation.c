@@ -10,6 +10,7 @@ const int ni=50;
 const double dt=0.1;
 const int size=500;
 const int org=50;
+const int  dx=1;
 
 // //初期座標
 // double x0[size]; 
@@ -34,6 +35,7 @@ int ro[size][size]; //密度
 
 //重力場F
 double Fx[size][size];
+double Fy[size][size];
 
 //天体が受ける力
 double Fpx[size];
@@ -43,8 +45,9 @@ double Fpy[size];
 // void init_v();
 // void init_move();
 void init_phi();
-void init_ro();
-int nearest_grid_point(double x);
+// void init_ro();
+void calc_ro ();
+int nearest_value(double x);
 void gauss_seidel();
 void gravity();
 
@@ -75,22 +78,31 @@ void init_phi(){
     }
 }
 
-//密度の初期化
-void init_ro(){
-    //初期化
-    for(int ix=0; ix<=size; ix++) for(int iy=0; iy<=size; iy++) {
-            ro[ix][iy] = 0.0;
-    }
+// //密度の初期化
+// void init_ro(){
+//     //初期化
+//     for(int ix=0; ix<=size; ix++) for(int iy=0; iy<=size; iy++) {
+//             ro[ix][iy] = 0.0;
+//     }
+// }
+
+//密度の計算
+void calc_ro () {
+  for (int i = 0; i < size; i++) for (int j = 0; j < size; j++) {
+      ro[i][j] = 0.0;
+  }
+  for (int i = 0; i < size; i++) {
+    ro[nearest_value(x[i])][nearest_value(y[i])] += M;
+  }
 }
 
 //NGP法
-int nearest_grid_point(double x) {
+int nearest_value(double x) {
     return (int) floor(x + 0.5);
 }
 
 //ガウス・ザイデル法
 void gauss_seidel(){
-    int dx=1;
     double p1,p2;
     for(int i=1; i<=ni; i++){   
         for(int ix=1; ix<=nm; ix++) for(int iy=1; iy<=nm; iy++){
@@ -101,16 +113,19 @@ void gauss_seidel(){
     }
 }
 
-void gravity(){
-     for(int ix=1; ix<=nm; ix++) for(int iy=1; iy<=nm; iy++){
-            Fx[ix][iy]=-(phi[ix+1][iy]-phi[ix][iy])/dt;
-        }
+void gravity() {
+  for (int ix = 0; ix < 500; ++ix) {
+    for (int iy = 0; iy < 500; ++iy) {
+      Fx[ix][iy] = ( - ((phi[ix + 1][iy]) - (phi[ix][iy]))) / dx;
+      Fy[ix][iy] = ( - ((phi[ix][iy + 1]) - (phi[ix][iy]))) / dt;
+    }
+  }
 }
 
 int main(void){
     FILE *fp ;
 
-    int size = 500;
+    int size = 100;
 
     double x0[size];
     double y0[size];
@@ -173,33 +188,37 @@ int main(void){
     }
     // init_move();
 
-    //膨張前の座標保存
-    for (int i=0;i<size;i++){
-        x_[i]=x[i];
-        y_[i]=y[i];
-    }
+    // //膨張前の座標保存
+    // for (int i=0;i<size;i++){
+    //     x0[i]=x[i];
+    //     y0[i]=y[i];
+    // }
 
-    for (int i = 0; i < size; i++)
-    {
-        printf("%lf%lf\n",x_[i],y_[i]);
-    }
+    // for (int i = 0; i < size; i++)
+    // {
+    //     printf("%lf%lf\n",x0[i],y0[i]);
+    // }
 
     //ポテンシャルの初期化
     init_phi();
-
-
+    
+    //時間ステップ数ループ
     for (int s=0;s<nk;nk++){
-    //質量密度を計算
-    for(int i=0; i<=size; i++){ 
-            for(int j=0; j<=size; j++) {
-                int n_x=nearest_grid_point(x[i]);
-                int n_y=nearest_grid_point(y[j]);
-                ro[n_x][n_y]=ro[n_x][n_y]+1;
-            }
-        }
-        
+        //質量密度を計算
+        // for(int i=0; i<=size; i++){ 
+        //     int n_x=nearest_grid_point(x[i]);
+        //     int n_y=nearest_grid_point(y[i]);
+        //     ro[n_x][n_y]=ro[n_x][n_y]+1;
+        // }
+        calc_ro();
+        // for (int i=0;i<size;i++) for (int j=0;j<size;j++){
+        //      printf("%d\n",ro[i][j]);
+        // }
         //ポテンシャルを計算
         gauss_seidel();
+        // for (int i=0;i<size;i++) for (int j=0;j<size;j++){
+        //      printf("%lf\n",phi[i][j]);
+        // }
 
         //重力場Ffを計算
         gravity();
@@ -207,10 +226,10 @@ int main(void){
         //天体の運動
         for (int i=0;i<size;i++){
             //天体が受ける力Fpを計算
-            int nx=nearest_grid_point(x[i]);
-            int ny=nearest_grid_point(y[i]);
+            int nx=nearest_value(x[i]);
+            int ny=nearest_value(y[i]);
             Fpx[i]=M*Fx[nx][ny];
-            Fpy[i]=M*Fx[nx][ny];
+            Fpy[i]=M*Fy[nx][ny];
             //天体の新しい速度を計算
             vx[i]=vx[i]+(Fpx[i]/M)*dt;
             vy[i]=vy[i]+(Fpx[i]/M)*dt;
@@ -218,6 +237,7 @@ int main(void){
             x[i]=x[i]+vx[i]*dt;
             y[i]=y[i]+vy[i]*dt;
         }
+
     }
 
     for (int i = 0; i < size; i++)
@@ -225,14 +245,16 @@ int main(void){
         printf("%lf%lf\n",x[i],y[i]);
     }
 
-    for (int i = 0; i < size; i++)
-    {
-        printf("%lf,%lf,%lf,%lf\n",x_[i],y_[i],x[i],y[i]);
-    }
+    // for (int i = 0; i < size; i++)
+    // {
+    //     printf("%lf,%lf,%lf,%lf\n",x0[i],y0[i],x[i],y[i]);
+    // }
 
     for (int i=0;i<size;i++){
-        fprintf(fp,"%lf,%lf,%lf,%lf\n",x_[i],y_[i],x[i],y[i]);
+        fprintf(fp,"%lf,%lf,%lf,%lf\n",x0[i],y0[i],x[i],y[i]);
     }
+
+
     fclose(fp);
     return 0;
 }

@@ -2,187 +2,248 @@
 #include <stdlib.h>
 #include <math.h>
 
-const int nm = 99;
-const double M = 1.0;
-const double G = 1.0;
-const double H = 3.5;
-const int ni = 99;
-const double delta_t = 0.1;
-const int seed = 449;
-const double org = 50.0;
-const double delta_x = 1.0;
-const double delta_y = 1.0;
+const int nm = 99; //一軸あたりの格子点数
+const int G=1;
+const double M=1;
+const double H=3.5;
+const int ni=50;
+const double dt=0.1;
+const int size=500;
+const double org=50;
+const int  dx=1;
 
-double X [500];
-double Y [500];
 
-double rho [500][500];
-double phi [500][500];
+double x[size];
+double y[size];
 
-double Fx[500][500];
-double Fy[500][500];
-double Fpx[500];
-double Fpy[500];
-double vx[500];
-double vy[500];
+double x[size];
+double y[size];
 
-void init_place();
-int check(double, double);
-void move_a ();
-void calc_rho ();
-void calc_phi ();
-void calc_power_field ();
-void calc_move ();
-void calc_power ();
-int find_point (double);
-void calc_velocity ();
-void calc_position ();
-void move_b ();
-void print_move ();
+//速度
+double vx[size];
+double vy[size];
 
-int check (double x, double y) {
-  if ((x * x + y * y) > 25.0) {
-    return 0;
-  } else {
-    return 1;
-  }
-}
+//ポテンシャル
+double phi[size][size]; //求める解φ
+//密度
+int ro[size][size]; //密度
 
-void init_place () {
-  double x, y;
-  srand(seed);
-  for (int t = 0; t < 500; ++t) {
-    x = -5.0 + (double) (10.0 * rand()/RAND_MAX);
-    y = -5.0 + (double) (10.0 * rand()/RAND_MAX);
-    while (0 == check (x, y)) {
-      x = -5.0 + (double) (10.0 * rand()/RAND_MAX);
-      y = -5.0 + (double) (10.0 * rand()/RAND_MAX);
+//重力場F
+double Fx[size][size];
+double Fy[size][size];
+
+//天体が受ける力
+double Fpx[size];
+double Fpy[size];
+
+//関数一覧
+void init_phi();
+void gauss_seidel ();
+int nearest_value(double x);
+void calc_ro ();
+void gauss_seodel ();
+void gravity_field ();
+
+// void calc_move ();
+// void calc_power ();
+// void calc_velocity ();
+// void calc_position ();
+// void move_b ();
+
+//ポテンシャルの初期化
+void init_phi(){
+    //初期化
+    for(int ix=0; ix<=size; ix++) for(int iy=0; iy<=size; iy++) {
+            phi[ix][iy] = 0.0;
     }
-    X [t] = x;
-    Y [t] = y;
+}
+
+//NGP法
+int nearest_value(double x) {
+    return (int) floor(x + 0.5);
+}
+
+//密度の計算
+void calc_ro () {
+  for (int i = 0; i < size; i++) for (int j = 0; j < size; j++) {
+      ro[i][j] = 0.0;
+  }
+  for (int i = 0; i < size; i++) {
+    ro[nearest_value(x[i])][nearest_value(y[i])] += M;
   }
 }
 
-void init_phi () {
-  for (int i = 0; i < 500; ++i) {
-    for (int j = 0; j < 500; ++j) {
-      phi[i][j] = 0;
+//ガウス・ザイデル法
+void gauss_seidel(){
+    double p1,p2;
+    for(int i=1; i<=ni; i++){   
+        for(int ix=1; ix<=nm; ix++) for(int iy=1; iy<=nm; iy++){
+            p1 = phi[ix+1][iy]+phi[ix-1][iy]+phi[ix][iy+1]+phi[ix][iy-1];
+            p2 = G*ro[ix][iy]*dx*dx; /* G：定数*/
+            phi[ix][iy] = p1/4 - p2/4;
+        }
     }
-  }
 }
 
-void move_a () {
-  for (int ip = 0; ip < 500; ++ip) {
-    X [ip] = X [ip] + vx[ip] * delta_t;
-    Y [ip] = Y [ip] + vy[ip] * delta_t;
-  }
-}
-
-void calc_rho () {
-  for (int i = 0; i < 500; ++i) {
-    for (int j = 0; j < 500; ++j) {
-      rho[i][j] = 0.0;
-    }
-  }
-  for (int i = 0; i < 500; ++i) {
-    rho[(int)floor(X [i] + 0.5)][(int)floor(Y [i] + 0.5)] += M;
-  }
-}
-
-void calc_phi () {
-  double p1;
-  double p2;
-  for (int i = 1; i <= ni; ++i) {
-    for (int ix = 1; ix <= ni; ++ix) {
-      for (int iy = 1; iy <= ni; ++iy) {
-        p1 = phi [ix + 1] [iy] + phi [ix - 1] [iy]
-          + phi [ix] [iy + 1] + phi [ix] [iy - 1];
-        p2 = G * rho [ix] [iy] * delta_x * delta_x;
-        phi [ix] [iy] = (p1 - p2) / 4.0;
-      }
-    }
-  }
-
-
-void calc_power_field () {
-  for (int ix = 0; ix < 500; ++ix) {
-    for (int iy = 0; iy < 500; ++iy) {
-      Fx[ix][iy] = ( - ((phi[ix + 1][iy]) - (phi[ix][iy]))) / delta_x;
-      Fy[ix][iy] = ( - ((phi[ix][iy + 1]) - (phi[ix][iy]))) / delta_y;
+void gravity_field() {
+  for (int ix = 0; ix < size; ix++) {
+    for (int iy = 0; iy < size; iy++) {
+      Fx[ix][iy] = ( - ((phi[ix + 1][iy]) - (phi[ix][iy]))) / dx;
+      Fy[ix][iy] = ( - ((phi[ix][iy + 1]) - (phi[ix][iy]))) / dt;
     }
   }
 }
 
-int find_point (double p) {
-  return (int) floor(p + 0.5);
-}
+// void move_a () {
+//   for (int ip = 0; ip < 500; ++ip) {
+//     X [ip] = X [ip] + vx[ip] * delta_t;
+//     Y [ip] = Y [ip] + vy[ip] * delta_t;
+//   }
+// }
 
-void calc_power () {
-  int x, y;
-  for (int i = 0; i < 500; i++) {
-    x = find_point (X [i]);
-    y = find_point (Y [i]);
-    Fpx [i] = M * Fx [x] [y];
-    Fpy [i] = M * Fy [x] [y];
-  }
-}
 
-void calc_velocity () {
-  for (int ip = 0; ip < 500; ip++) {
-    vx [ip] = vx [ip] + (Fpx [ip] / M) * delta_t;
-    vy [ip] = vy [ip] + (Fpy [ip] / M) * delta_t;
-  }
-}
 
-void calc_position () {
-  for (int i = 0; i < 500; ++i) {
-    X[i] += vx[i] * delta_t;
-    Y[i] += vy[i] * delta_t;
-  }
-}
+// void calc_power_field () {
+//   for (int ix = 0; ix < 500; ++ix) {
+//     for (int iy = 0; iy < 500; ++iy) {
+//       Fx[ix][iy] = ( - ((phi[ix + 1][iy]) - (phi[ix][iy]))) / delta_x;
+//       Fy[ix][iy] = ( - ((phi[ix][iy + 1]) - (phi[ix][iy]))) / delta_y;
+//     }
+//   }
+// }
 
-void calc_move () {
-  calc_power ();
-  calc_velocity ();
-  calc_position ();
-}
 
-void move_b () {
-  calc_rho ();
-  calc_phi ();
-  calc_power_field ();
-  calc_move ();
-}
+// void calc_power () {
+//   int x, y;
+//   for (int i = 0; i < 500; i++) {
+//     x = find_point (X [i]);
+//     y = find_point (Y [i]);
+//     Fpx [i] = M * Fx [x] [y];
+//     Fpy [i] = M * Fy [x] [y];
+//   }
+// }
 
-void print_move () {
-  printf ("\n");
-  for (int t = 0; t < 500; ++t) {
-    printf ("%f,%f\n", X [t], Y [t]);
-  }
-}
+// void calc_velocity () {
+//   for (int ip = 0; ip < 500; ip++) {
+//     vx [ip] = vx [ip] + (Fpx [ip] / M) * delta_t;
+//     vy [ip] = vy [ip] + (Fpy [ip] / M) * delta_t;
+//   }
+// }
 
-int main (void) {
-  init_place ();
+// void calc_position () {
+//   for (int i = 0; i < 500; ++i) {
+//     X[i] += vx[i] * delta_t;
+//     Y[i] += vy[i] * delta_t;
+//   }
+// }
 
-  for (int ip = 0; ip < 500; ++ip) {
-    vx[ip] = H * X [ip];
-    vy[ip] = H * Y [ip];
+// void calc_move () {
+//   calc_power ();
+//   calc_velocity ();
+//   calc_position ();
+// }
 
-    X [ip] = X [ip] + org;
-    Y [ip] = Y [ip] + org;
-  }
+// void move_b () {
+//   calc_rho ();
+//   calc_phi ();
+//   calc_power_field ();
+//   calc_move ();
+// }
 
-  print_move ();
-  init_phi ();
+// void print_move () {
+//   printf ("\n");
+//   for (int t = 0; t < 500; ++t) {
+//     printf ("%f,%f\n", X [t], Y [t]);
+//   }
+// }
 
-  for (int i = 0; i < 20; ++i) {
-    move_b ();
-  }
-  print_move ();
-  for (int i = 0; i < 20; ++i) {
-    move_b ();
-  }
+int main(void){
+    FILE *fp ;
+
+    int size = 100;
+
+    double x0[size];
+    double y0[size];
+
+    fp = fopen("data.csv", "w"); if (fp == NULL) {
+        fprintf(stderr, "Error!¥n");
+        exit(1);
+    }
+
+    //時間ステップの指定
+    int step;
+    printf("%s\n","Please select the number; 0 or 20 or 40");
+    scanf("%d", &step);
+    int nk=step;
+
+    //乱数を生成
+    int number;
+    int seed[10] = {149,193,251,383,457,503,691,761,829,991};
+    printf("%s\n","Please input the numbeer (1~10) to select seed;");
+    printf("%s\n","1: 149, 2: 193, 3: 251, 4: 383, 5: 457, 6: 503, 7: 691, 8: 761, 9: 829, 10: 991");
+    scanf("%d", &number);
+    srand(seed[number-1]);
+
+    fprintf(fp,"%s,%s,%s,%s\n","x_","y_","x","y");
+
+    for (int i = 0; i < size; i++)
+    {
+        double x_r1 = (double)(10.0*rand()/(RAND_MAX + 1.0 ));
+        double x_r=x_r1-5.0;
+        x0[i]=x_r;
+        
+        double randmax=sqrt(25-x_r*x_r);
+        double y_r1 = (double)(2*randmax*rand()/(RAND_MAX + 1.0 ));  
+        double y_r=y_r1-randmax;
+        y0[i]=y_r;
+    }
+
+    //シミュレーション
+
+    //膨張前
+    // double x_[size];
+    // double y_[size];
+
+    //膨張後
+    // double x[size];
+    // double y[size];
+
+   //初速度を設定
+    for (int i=0;i<size;i++){
+        vx[i]=H*x0[i];
+        vy[i]=H*y0[i];
+    }
+
+    //全天体の位置を移動
+    for (int i=0;i<size;i++){
+        x[i]=x0[i]+org;
+        y[i]=y0[i]+org;
+    }
+  
+
+
+  for (int s = 0; s < nk; s++) {
+      calc_ro ();
+      calc_phi ();
+      gravity_field ();
+      for (int i=0;i<size;i++){
+            //天体が受ける力Fpを計算
+            int nx=nearest_value(x[i]);
+            int ny=nearest_value(y[i]);
+            Fpx[i]=M*Fx[nx][ny];
+            Fpy[i]=M*Fy[nx][ny];
+            //天体の新しい速度を計算
+            vx[i]=vx[i]+(Fpx[i]/M)*dt;
+            vy[i]=vy[i]+(Fpx[i]/M)*dt;
+            //天体の新しい位置を計算
+            x[i]=x[i]+vx[i]*dt;
+            y[i]=y[i]+vy[i]*dt;
+        }
+    }
+    print_move ();
+    for (int i = 0; i < 20; ++i) {
+      move_b ();
+    }
   print_move ();
   return 0;
-}
 }
