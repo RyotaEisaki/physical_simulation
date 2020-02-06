@@ -11,6 +11,7 @@ int main(void){
     int nm=2; /* nm：1軸当たりの格子点数*/
     
     int ni; /* ni：反復回数*/
+    
     int G=1;
     int dx=1;
     int ro[4][4]; //密度
