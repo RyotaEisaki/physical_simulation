@@ -9,6 +9,7 @@ const double H=3.5;
 const int ni=50;
 const double dt=0.1;
 const int size=500;
+const int org=50;
 
 const double Fp;
 
@@ -17,8 +18,11 @@ const double Fp;
 double x0[size]; 
 double y0[size];
 
+//膨張前
+double x_[size];
+double y_[size];
 
-//座標
+//膨張後
 double x[size];
 double y[size];
 
@@ -26,47 +30,84 @@ double y[size];
 double vx[size];
 double vy[size];
 
+//ポテンシャル
+double phi[size][size]; //求める解φ
+//密度
+int ro[size][size]; //密度
 
+//天体が受ける力
+double Fpx[size];
+double Fpy[size];
+
+//関数一覧
+void init_v();
+void new_v();
+
+void init_move();
+
+void init_phi();
+void init_ro();
+int nearest_grid_point(double x);
+double gauss_seidel(int nm);
+
+//速度の初期化
 void init_v () {
   for (int i = 0; i < size; ++i) {
-    vx[i] = H*x[i];
-    vy[i] = H*y[i];
+    vx[i] = H*x0[i];
+    vy[i] = H*y0[i];
   }
 }
 
+//速度の更新
 void new_v(double Fp) {
     for (int ip = 0; ip < size; ++ip) {
         vx[ip] = vx[ip]+(Fpx/M)*dt;
         vy[ip] = vy[ip]+(Fpx/M)*dt;
-
   }
 }
 
-int ro_calc(int x, int y){
-    return 6*x-3*y;
+//第一象限への移動
+void init_move(){
+    for (int i=0;i<size;i++){
+        x[i]=x0[i]+org;
+        y[i]=y0[i]+org;
+    }
 }
 
-double gauss_seidel(int nm){
-    int ix,iy;   
-    int dx=1;
-    int ro[nm+1][nm+1]; //密度
-    double phi[nm+1][nm+1]; //求める解φ
-    double p1,p2;
-
+//ポテンシャルの初期化
+void init_phi(){
     //初期化
-    for(ix=0; ix<=nm+1; ix++) for(iy=0; iy<=nm+1; iy++) {
+    for(int ix=0; ix<=size; ix++) for(int iy=0; iy<=size; iy++) {
             phi[ix][iy] = 0.0;
         }
-    
+}
+
+//密度の初期化
+void init_ro(){
+    //初期化
+    for(int ix=0; ix<=size; ix++) for(int iy=0; iy<=size; iy++) {
+            ro[ix][iy] = 0.0;
+        }
+}
+
+//NGP法
+int nearest_grid_point(double x) {
+    return (int) floor(x + 0.5);
+}
+
+//ガウス・ザイデル法
+double gauss_seidel(int nm){
+    int dx=1;
+    double p1,p2;
     for(int i=1; i<=ni; i++){   
-        for(ix=1; ix<=nm; ix++) for(iy=1; iy<=nm; iy++){
+        for(int ix=1; ix<=nm; ix++) for(int iy=1; iy<=nm; iy++){
             p1 = phi[ix+1][iy]+phi[ix-1][iy]+phi[ix][iy+1]+phi[ix][iy-1];
             p2 = G*ro[ix][iy]*dx*dx; /* G：定数*/
             phi[ix][iy] = p1/4 - p2/4;
         }
     }
-
 }
+
 
 
 int main(void){
@@ -81,6 +122,12 @@ int main(void){
         fprintf(stderr, "Error!¥n");
         exit(1);
     }
+
+    //時間ステップの指定
+    int step;
+    printf("%s\n","Please select the number(0 or 20 or 40");
+    scanf("%d", &step);
+    int nk=step;
 
     //乱数を生成
     int number;
@@ -105,35 +152,31 @@ int main(void){
     }
 
     //シミュレーション
-    double H=3.5;
-    double org=50.0;
-    double dt=0.1;
-    int nk=20;
-
-    double vx[size];
-    double vy[size];
 
     //膨張前
-    double x_[size];
-    double y_[size];
+    // double x_[size];
+    // double y_[size];
 
     //膨張後
-    double x[size];
-    double y[size];
+    // double x[size];
+    // double y[size];
 
 
     //初速度を設定
-    for (int i=0;i<size;i++){
-        vx[i]=H*x0[i];
-        vy[i]=H*y0[i];
-    }
+    // for (int i=0;i<size;i++){
+    //     vx[i]=H*x0[i];
+    //     vy[i]=H*y0[i];
+    // }
+    init_v();
 
     //全天体の位置を移動
-    for (int i=0;i<size;i++){
-        x[i]=x0[i]+org;
-        y[i]=y0[i]+org;
-    }
+    // for (int i=0;i<size;i++){
+    //     x[i]=x0[i]+org;
+    //     y[i]=y0[i]+org;
+    // }
+    init_move();
 
+    //膨張前の座標保存
     for (int i=0;i<size;i++){
         x_[i]=x[i];
         y_[i]=y[i];
@@ -144,14 +187,21 @@ int main(void){
         printf("%lf%lf\n",x_[i],y_[i]);
     }
 
-    //新しい位置を計算
-    for (int l; l<nk;l++){
-        for (int i=0;i<size;i++){
-            x[i]=x[i]+vx[i]*dt;
-            y[i]=y[i]+vy[i]*dt;
+    //ポテンシャルの初期化
+    init_phi();
+
+
+
+   //質量密度を計算
+   for(int i=0; i<=size; i++){ 
+        for(int j=0; j<=size; j++) {
+            int n_x=nearest_grid_point(x[i]);
+            int n_y=nearest_grid_point(y[j]);
+            ro[n_x][n_y]=ro[n_x][n_y]+1;
         }
     }
     
+
     for (int i = 0; i < size; i++)
     {
         printf("%lf%lf\n",x[i],y[i]);

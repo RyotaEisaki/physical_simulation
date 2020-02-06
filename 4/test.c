@@ -185,3 +185,4 @@ int main (void) {
   print_move ();
   return 0;
 }
+}
