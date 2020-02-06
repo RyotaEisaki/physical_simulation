@@ -11,12 +11,9 @@ const double dt=0.1;
 const int size=500;
 const int org=50;
 
-const double Fp;
-
-
-//初期座標
-double x0[size]; 
-double y0[size];
+// //初期座標
+// double x0[size]; 
+// double y0[size];
 
 //膨張前
 double x_[size];
@@ -35,51 +32,47 @@ double phi[size][size]; //求める解φ
 //密度
 int ro[size][size]; //密度
 
+//重力場F
+double Fx[size][size];
+
 //天体が受ける力
 double Fpx[size];
 double Fpy[size];
 
 //関数一覧
-void init_v();
-void new_v();
-
-void init_move();
-
+// void init_v();
+// void init_move();
 void init_phi();
 void init_ro();
 int nearest_grid_point(double x);
-double gauss_seidel(int nm);
+void gauss_seidel();
+void gravity();
 
-//速度の初期化
-void init_v () {
-  for (int i = 0; i < size; ++i) {
-    vx[i] = H*x0[i];
-    vy[i] = H*y0[i];
-  }
-}
+// double power();
+// void new_v();
 
-//速度の更新
-void new_v(double Fp) {
-    for (int ip = 0; ip < size; ++ip) {
-        vx[ip] = vx[ip]+(Fpx/M)*dt;
-        vy[ip] = vy[ip]+(Fpx/M)*dt;
-  }
-}
+// //速度の初期化
+// void init_v () {
+//   for (int i = 0; i < size; ++i) {
+//     vx[i] = H*x0[i];
+//     vy[i] = H*y0[i];
+//   }
+// }
 
-//第一象限への移動
-void init_move(){
-    for (int i=0;i<size;i++){
-        x[i]=x0[i]+org;
-        y[i]=y0[i]+org;
-    }
-}
+// //第一象限への移動
+// void init_move(){
+//     for (int i=0;i<size;i++){
+//         x[i]=x0[i]+org;
+//         y[i]=y0[i]+org;
+//     }
+// }
 
 //ポテンシャルの初期化
 void init_phi(){
     //初期化
     for(int ix=0; ix<=size; ix++) for(int iy=0; iy<=size; iy++) {
             phi[ix][iy] = 0.0;
-        }
+    }
 }
 
 //密度の初期化
@@ -87,7 +80,7 @@ void init_ro(){
     //初期化
     for(int ix=0; ix<=size; ix++) for(int iy=0; iy<=size; iy++) {
             ro[ix][iy] = 0.0;
-        }
+    }
 }
 
 //NGP法
@@ -96,7 +89,7 @@ int nearest_grid_point(double x) {
 }
 
 //ガウス・ザイデル法
-double gauss_seidel(int nm){
+void gauss_seidel(){
     int dx=1;
     double p1,p2;
     for(int i=1; i<=ni; i++){   
@@ -108,7 +101,11 @@ double gauss_seidel(int nm){
     }
 }
 
-
+void gravity(){
+     for(int ix=1; ix<=nm; ix++) for(int iy=1; iy<=nm; iy++){
+            Fx[ix][iy]=-(phi[ix+1][iy]-phi[ix][iy])/dt;
+        }
+}
 
 int main(void){
     FILE *fp ;
@@ -125,7 +122,7 @@ int main(void){
 
     //時間ステップの指定
     int step;
-    printf("%s\n","Please select the number(0 or 20 or 40");
+    printf("%s\n","Please select the number; 0 or 20 or 40");
     scanf("%d", &step);
     int nk=step;
 
@@ -163,18 +160,18 @@ int main(void){
 
 
     //初速度を設定
-    // for (int i=0;i<size;i++){
-    //     vx[i]=H*x0[i];
-    //     vy[i]=H*y0[i];
-    // }
-    init_v();
+    for (int i=0;i<size;i++){
+        vx[i]=H*x0[i];
+        vy[i]=H*y0[i];
+    }
+    // init_v();
 
     //全天体の位置を移動
-    // for (int i=0;i<size;i++){
-    //     x[i]=x0[i]+org;
-    //     y[i]=y0[i]+org;
-    // }
-    init_move();
+    for (int i=0;i<size;i++){
+        x[i]=x0[i]+org;
+        y[i]=y0[i]+org;
+    }
+    // init_move();
 
     //膨張前の座標保存
     for (int i=0;i<size;i++){
@@ -191,16 +188,37 @@ int main(void){
     init_phi();
 
 
+    for (int s=0;s<nk;nk++){
+    //質量密度を計算
+    for(int i=0; i<=size; i++){ 
+            for(int j=0; j<=size; j++) {
+                int n_x=nearest_grid_point(x[i]);
+                int n_y=nearest_grid_point(y[j]);
+                ro[n_x][n_y]=ro[n_x][n_y]+1;
+            }
+        }
+        
+        //ポテンシャルを計算
+        gauss_seidel();
 
-   //質量密度を計算
-   for(int i=0; i<=size; i++){ 
-        for(int j=0; j<=size; j++) {
-            int n_x=nearest_grid_point(x[i]);
-            int n_y=nearest_grid_point(y[j]);
-            ro[n_x][n_y]=ro[n_x][n_y]+1;
+        //重力場Ffを計算
+        gravity();
+
+        //天体の運動
+        for (int i=0;i<size;i++){
+            //天体が受ける力Fpを計算
+            int nx=nearest_grid_point(x[i]);
+            int ny=nearest_grid_point(y[i]);
+            Fpx[i]=M*Fx[nx][ny];
+            Fpy[i]=M*Fx[nx][ny];
+            //天体の新しい速度を計算
+            vx[i]=vx[i]+(Fpx[i]/M)*dt;
+            vy[i]=vy[i]+(Fpx[i]/M)*dt;
+            //天体の新しい位置を計算
+            x[i]=x[i]+vx[i]*dt;
+            y[i]=y[i]+vy[i]*dt;
         }
     }
-    
 
     for (int i = 0; i < size; i++)
     {
