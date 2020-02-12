@@ -184,13 +184,8 @@ int main (void) {
     y[ip] = y[ip] + org;
   }
 
-//   print_position ();
   init_phi ();
 
-//   for (int i = 0; i < nk; i++) {
-//     move ();
-//   }
-//   print_position ();
   for (int i = 0; i < nk; i++) {
     move ();
   }
