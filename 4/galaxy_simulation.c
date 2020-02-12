@@ -11,7 +11,7 @@ const double org=50;
 const int  dx=1;
 const int  dy=1;
 
-const double H=3.5;
+const double H=2.0;
 const int size=500;
 const int seed=383;
 
