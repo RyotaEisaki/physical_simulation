@@ -1,26 +1,20 @@
-#include<stdio.h>
-#include<stdlib.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 
-const int nm=99; /* nm：1軸当たりの格子点数*/
+const int nm = 99; //一軸あたりの格子点数
 const int G=1;
 const double M=1;
-const double H=3.5;
 const int ni=50;
 const double dt=0.1;
-const int size=500;
-const int org=50;
+const double org=50;
 const int  dx=1;
+const int  dy=1;
 
-// //初期座標
-// double x0[size]; 
-// double y0[size];
+const double H=3.5;
+const int size=500;
+const int seed=383;
 
-//膨張前
-double x_[size];
-double y_[size];
-
-//膨張後
 double x[size];
 double y[size];
 
@@ -42,63 +36,57 @@ double Fpx[size];
 double Fpy[size];
 
 //関数一覧
-// void init_v();
-// void init_move();
-void init_phi();
-// void init_ro();
+int check(double, double);
 void calc_ro ();
-int nearest_value(double x);
+void init_phi();
 void gauss_seidel();
-void gravity();
 
-// double power();
-// void new_v();
+void gravity_field ();
+void calc_move ();
+void calc_power ();
+int ngp (double);
+void calc_velocity ();
+void calc_position ();
+void move ();
+void print_move ();
 
-// //速度の初期化
-// void init_v () {
-//   for (int i = 0; i < size; ++i) {
-//     vx[i] = H*x0[i];
-//     vy[i] = H*y0[i];
-//   }
-// }
-
-// //第一象限への移動
-// void init_move(){
-//     for (int i=0;i<size;i++){
-//         x[i]=x0[i]+org;
-//         y[i]=y0[i]+org;
-//     }
-// }
-
-//ポテンシャルの初期化
-void init_phi(){
-    //初期化
-    for(int ix=0; ix<=size; ix++) for(int iy=0; iy<=size; iy++) {
-            phi[ix][iy] = 0.0;
-    }
+int check (double x, double y) {
+    if ((x * x + y * y) > 25.0) return 0;
+    else { return 1;}
 }
 
-// //密度の初期化
-// void init_ro(){
-//     //初期化
-//     for(int ix=0; ix<=size; ix++) for(int iy=0; iy<=size; iy++) {
-//             ro[ix][iy] = 0.0;
-//     }
-// }
+void init_place () {
+  double x_, y_;
+  srand(seed);
+  for (int t = 0; t < size; ++t) {
+    x_ = -5.0 + (double) (10.0 * rand()/RAND_MAX);
+    y_ = -5.0 + (double) (10.0 * rand()/RAND_MAX);
+    while (0 == check (x_, y_)) {
+      x_ = -5.0 + (double) (10.0 * rand()/RAND_MAX);
+      y_ = -5.0 + (double) (10.0 * rand()/RAND_MAX);
+    }
+    x[t] = x_;
+    y[t] = y_;
+  }
+}
 
-//密度の計算
+void init_phi () {
+  for (int i = 0; i < size; ++i) {
+    for (int j = 0; j < size; ++j) {
+      phi[i][j] = 0;
+    }
+  }
+}
+
 void calc_ro () {
-  for (int i = 0; i < size; i++) for (int j = 0; j < size; j++) {
+  for (int i = 0; i < size; i++) {
+    for (int j = 0; j < size; j++) {
       ro[i][j] = 0.0;
+    }
   }
   for (int i = 0; i < size; i++) {
-    ro[nearest_value(x[i])][nearest_value(y[i])] += M;
+    ro[(int)floor(x[i] + 0.5)][(int)floor(y[i] + 0.5)] += M;
   }
-}
-
-//NGP法
-int nearest_value(double x) {
-    return (int) floor(x + 0.5);
 }
 
 //ガウス・ザイデル法
@@ -113,22 +101,66 @@ void gauss_seidel(){
     }
 }
 
-void gravity() {
-  for (int ix = 0; ix < 500; ++ix) {
-    for (int iy = 0; iy < 500; ++iy) {
-      Fx[ix][iy] = ( - ((phi[ix + 1][iy]) - (phi[ix][iy]))) / dx;
-      Fy[ix][iy] = ( - ((phi[ix][iy + 1]) - (phi[ix][iy]))) / dt;
+void gravity_field () {
+  for (int ix = 0; ix < size; ix++) {
+    for (int iy = 0; iy < size; iy++) {
+      Fx[ix][iy] = ( - ((phi[ix+1][iy]) - (phi[ix][iy]))) / dx;
+      Fy[ix][iy] = ( - ((phi[ix][iy+1]) - (phi[ix][iy]))) / dx;
     }
   }
 }
 
-int main(void){
+int ngp (double p) {
+  return (int) floor(p + 0.5);
+}
+
+void calc_power () {
+  int _x, _y;
+  for (int i = 0; i < size; i++) {
+    _x = ngp (x[i]);
+    _y = ngp (y[i]);
+    Fpx[i] = M * Fx[_x][_y];
+    Fpy[i] = M * Fy[_x][_y];
+  }
+}
+
+void calc_velocity () {
+  for (int ip = 0; ip < size; ip++) {
+    vx[ip] = vx[ip] + (Fpx[ip] / M) * dt;
+    vy[ip] = vy[ip] + (Fpy[ip] / M) * dt;
+  }
+}
+
+void calc_position () {
+  for (int i = 0; i < size; i++) {
+    x[i] += vx[i] * dt;
+    y[i] += vy[i] * dt;
+  }
+}
+
+void calc_move () {
+  calc_power ();
+  calc_velocity ();
+  calc_position ();
+}
+
+void move () {
+  calc_ro ();
+  gauss_seidel ();
+  gravity_field ();
+  calc_move ();
+}
+
+void print_position () {
+  printf ("\n");
+  for (int t = 0; t < size; t++) {
+    printf ("%f,%f\n", x[t], y[t]);
+  }
+}
+
+int main (void) {
+
     FILE *fp ;
-
-    int size = 100;
-
-    double x0[size];
-    double y0[size];
 
     fp = fopen("data.csv", "w"); if (fp == NULL) {
         fprintf(stderr, "Error!¥n");
@@ -141,120 +173,25 @@ int main(void){
     scanf("%d", &step);
     int nk=step;
 
-    //乱数を生成
-    int number;
-    int seed[10] = {149,193,251,383,457,503,691,761,829,991};
-    printf("%s\n","Please input the numbeer (1~10) to select seed;");
-    printf("%s\n","1: 149, 2: 193, 3: 251, 4: 383, 5: 457, 6: 503, 7: 691, 8: 761, 9: 829, 10: 991");
-    scanf("%d", &number);
-    srand(seed[number-1]);
 
-    fprintf(fp,"%s,%s,%s,%s\n","x_","y_","x","y");
+    init_place ();
 
-    for (int i = 0; i < size; i++)
-    {
-        double x_r1 = (double)(10.0*rand()/(RAND_MAX + 1.0 ));
-        double x_r=x_r1-5.0;
-        x0[i]=x_r;
-        
-        double randmax=sqrt(25-x_r*x_r);
-        double y_r1 = (double)(2*randmax*rand()/(RAND_MAX + 1.0 ));  
-        double y_r=y_r1-randmax;
-        y0[i]=y_r;
+  for (int ip = 0; ip < size; ip++) {
+    vx[ip] = H * x[ip];
+    vy[ip] = H * y[ip];
+
+    x[ip] = x[ip] + org;
+    y[ip] = y[ip] + org;
+  }
+
+  init_phi ();
+
+  for (int i = 0; i < nk; i++) {
+    move ();
+  }
+  print_position ();
+  for (int i=0;i<size;i++){
+        fprintf(fp,"%lf,%lf\n",x[i],y[i]);
     }
-
-    //シミュレーション
-
-    //膨張前
-    // double x_[size];
-    // double y_[size];
-
-    //膨張後
-    // double x[size];
-    // double y[size];
-
-
-    //初速度を設定
-    for (int i=0;i<size;i++){
-        vx[i]=H*x0[i];
-        vy[i]=H*y0[i];
-    }
-    // init_v();
-
-    //全天体の位置を移動
-    for (int i=0;i<size;i++){
-        x[i]=x0[i]+org;
-        y[i]=y0[i]+org;
-    }
-    // init_move();
-
-    // //膨張前の座標保存
-    // for (int i=0;i<size;i++){
-    //     x0[i]=x[i];
-    //     y0[i]=y[i];
-    // }
-
-    // for (int i = 0; i < size; i++)
-    // {
-    //     printf("%lf%lf\n",x0[i],y0[i]);
-    // }
-
-    //ポテンシャルの初期化
-    init_phi();
-    
-    //時間ステップ数ループ
-    for (int s=0;s<nk;nk++){
-        //質量密度を計算
-        // for(int i=0; i<=size; i++){ 
-        //     int n_x=nearest_grid_point(x[i]);
-        //     int n_y=nearest_grid_point(y[i]);
-        //     ro[n_x][n_y]=ro[n_x][n_y]+1;
-        // }
-        calc_ro();
-        // for (int i=0;i<size;i++) for (int j=0;j<size;j++){
-        //      printf("%d\n",ro[i][j]);
-        // }
-        //ポテンシャルを計算
-        gauss_seidel();
-        // for (int i=0;i<size;i++) for (int j=0;j<size;j++){
-        //      printf("%lf\n",phi[i][j]);
-        // }
-
-        //重力場Ffを計算
-        gravity();
-
-        //天体の運動
-        for (int i=0;i<size;i++){
-            //天体が受ける力Fpを計算
-            int nx=nearest_value(x[i]);
-            int ny=nearest_value(y[i]);
-            Fpx[i]=M*Fx[nx][ny];
-            Fpy[i]=M*Fy[nx][ny];
-            //天体の新しい速度を計算
-            vx[i]=vx[i]+(Fpx[i]/M)*dt;
-            vy[i]=vy[i]+(Fpx[i]/M)*dt;
-            //天体の新しい位置を計算
-            x[i]=x[i]+vx[i]*dt;
-            y[i]=y[i]+vy[i]*dt;
-        }
-
-    }
-
-    for (int i = 0; i < size; i++)
-    {
-        printf("%lf%lf\n",x[i],y[i]);
-    }
-
-    // for (int i = 0; i < size; i++)
-    // {
-    //     printf("%lf,%lf,%lf,%lf\n",x0[i],y0[i],x[i],y[i]);
-    // }
-
-    for (int i=0;i<size;i++){
-        fprintf(fp,"%lf,%lf,%lf,%lf\n",x0[i],y0[i],x[i],y[i]);
-    }
-
-
-    fclose(fp);
-    return 0;
+  return 0;
 }
