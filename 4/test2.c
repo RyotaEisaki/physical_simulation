@@ -102,7 +102,7 @@ void calc_phi () {
       }
     }
   }
-
+}
 
 void calc_power_field () {
   for (int ix = 0; ix < 500; ++ix) {

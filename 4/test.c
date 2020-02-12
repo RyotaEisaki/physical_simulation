@@ -16,9 +16,6 @@ const int  dx=1;
 double x[size];
 double y[size];
 
-double x[size];
-double y[size];
-
 //速度
 double vx[size];
 double vy[size];
@@ -186,6 +183,7 @@ int main(void){
 
     fprintf(fp,"%s,%s,%s,%s\n","x_","y_","x","y");
 
+  //初期座標
     for (int i = 0; i < size; i++)
     {
         double x_r1 = (double)(10.0*rand()/(RAND_MAX + 1.0 ));
@@ -214,7 +212,7 @@ int main(void){
         vy[i]=H*y0[i];
     }
 
-    //全天体の位置を移動
+    //全天体の位置を第一象限へ移動
     for (int i=0;i<size;i++){
         x[i]=x0[i]+org;
         y[i]=y0[i]+org;
@@ -240,6 +238,7 @@ int main(void){
             y[i]=y[i]+vy[i]*dt;
         }
     }
+
     print_move ();
     for (int i = 0; i < 20; ++i) {
       move_b ();
