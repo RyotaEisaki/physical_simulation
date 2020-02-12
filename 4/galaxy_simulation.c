@@ -11,7 +11,7 @@ const double org=50;
 const int  dx=1;
 const int  dy=1;
 
-const double H=2.0;
+const double H=3.0;
 const int size=500;
 const int seed=383;
 
@@ -23,9 +23,9 @@ double vx[size];
 double vy[size];
 
 //ポテンシャル
-double phi[size][size]; //求める解φ
+double phi[size][size]; 
 //密度
-int ro[size][size]; //密度
+int ro[size][size]; 
 
 //重力場F
 double Fx[size][size];
@@ -40,7 +40,6 @@ int check(double, double);
 void calc_ro ();
 void init_phi();
 void gauss_seidel();
-
 void gravity_field ();
 void calc_move ();
 void calc_power ();
@@ -50,11 +49,13 @@ void calc_position ();
 void move ();
 void print_move ();
 
+//関数の定義
 int check (double x, double y) {
     if ((x * x + y * y) > 25.0) return 0;
     else { return 1;}
 }
 
+//初期座標
 void init_place () {
   double x_, y_;
   srand(seed);
@@ -70,6 +71,7 @@ void init_place () {
   }
 }
 
+//ポテンシャルの初期化
 void init_phi () {
   for (int i = 0; i < size; ++i) {
     for (int j = 0; j < size; ++j) {
@@ -78,6 +80,7 @@ void init_phi () {
   }
 }
 
+//密度の計算
 void calc_ro () {
   for (int i = 0; i < size; i++) {
     for (int j = 0; j < size; j++) {
@@ -101,6 +104,7 @@ void gauss_seidel(){
     }
 }
 
+//重力場の計算　
 void gravity_field () {
   for (int ix = 0; ix < size; ix++) {
     for (int iy = 0; iy < size; iy++) {
@@ -110,10 +114,12 @@ void gravity_field () {
   }
 }
 
+//ngp法
 int ngp (double p) {
   return (int) floor(p + 0.5);
 }
 
+//力の計算
 void calc_power () {
   int _x, _y;
   for (int i = 0; i < size; i++) {
@@ -124,6 +130,7 @@ void calc_power () {
   }
 }
 
+//速度の更新
 void calc_velocity () {
   for (int ip = 0; ip < size; ip++) {
     vx[ip] = vx[ip] + (Fpx[ip] / M) * dt;
@@ -131,6 +138,7 @@ void calc_velocity () {
   }
 }
 
+//位置の更新
 void calc_position () {
   for (int i = 0; i < size; i++) {
     x[i] += vx[i] * dt;
@@ -138,12 +146,14 @@ void calc_position () {
   }
 }
 
+//位置の計算
 void calc_move () {
   calc_power ();
   calc_velocity ();
   calc_position ();
 }
 
+//移動
 void move () {
   calc_ro ();
   gauss_seidel ();
@@ -151,6 +161,7 @@ void move () {
   calc_move ();
 }
 
+//座標の出力
 void print_position () {
   printf ("\n");
   for (int t = 0; t < size; t++) {
