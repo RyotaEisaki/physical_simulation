@@ -151,7 +151,7 @@ void move () {
   calc_move ();
 }
 
-void print_move () {
+void print_position () {
   printf ("\n");
   for (int t = 0; t < size; t++) {
     printf ("%f,%f\n", x[t], y[t]);
@@ -184,17 +184,17 @@ int main (void) {
     y[ip] = y[ip] + org;
   }
 
-  print_move ();
+//   print_position ();
   init_phi ();
 
+//   for (int i = 0; i < nk; i++) {
+//     move ();
+//   }
+//   print_position ();
   for (int i = 0; i < nk; i++) {
     move ();
   }
-  print_move ();
-  for (int i = 0; i < nk; i++) {
-    move ();
-  }
-  print_move ();
+  print_position ();
   for (int i=0;i<size;i++){
         fprintf(fp,"%lf,%lf\n",x[i],y[i]);
     }
